@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>E-Waste Classification</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 40px; }
+    .upload-box { border: 2px dashed #ccc; padding: 30px; width: 300px; margin: auto; }
+    .button-group { margin-top: 20px; }
+    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>E-Waste Image Classifier</h1>
+
+  <div class="upload-box" id="drop-area">
+    <p>Drag and drop an image here</p>
+    <input type="file" id="fileInput" accept="image/*" />
+  </div>
+
+  <div class="button-group">
+    <button onclick="submitForm('mobilenet')">Predict with MobileNetV3Large</button>
+    <button onclick="submitForm('efficientnet')">Predict with EfficientNetV2B3</button>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const dropArea = document.getElementById("drop-area");
+
+    dropArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropArea.style.borderColor = "green";
+    });
+
+    dropArea.addEventListener("dragleave", () => {
+      dropArea.style.borderColor = "#ccc";
+    });
+
+    dropArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      fileInput.files = e.dataTransfer.files;
+    });
+
+    function submitForm(model) {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please upload an image first.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("model", model);
+
+      fetch("/predict", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          document.getElementById("result").innerHTML =
+            `<h2>Prediction: ${data.class}</h2><p>Confidence: ${data.confidence}%</p>`;
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Prediction failed.");
+        });
+    }
+  </script>
+</body>
+</html>
