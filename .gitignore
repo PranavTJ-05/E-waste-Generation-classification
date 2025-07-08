@@ -1,6 +1,4 @@
 /modified-dataset
-/flask-app/venv
-/flask-app/__pycache__/
-/flask-app/*.db
-/flask-app/*.sqlite3
-/flask-app/*.log
+/venv
+/__pycache__/
+/*.log
