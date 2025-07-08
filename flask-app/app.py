@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from tensorflow.keras.models import load_model
+from tensorflow.keras.applications.efficientnet import preprocess_input as efficientnet_preprocess
+from tensorflow.keras.applications.mobilenet_v3 import preprocess_input as mobilenet_preprocess
 import numpy as np
 from PIL import Image
 import os
@@ -8,7 +10,7 @@ app = Flask(__name__)
 
 # Paths to both models
 EFFICIENTNET_MODEL_PATH = os.path.join("models", "Efficient_classify_v2b3.keras")
-MOBILENET_MODEL_PATH = os.path.join("models", "Mobile_classify_v3large.keras")
+MOBILENET_MODEL_PATH = os.path.join("models", "mobilenetv3_large_web_model.keras")
 
 # Load both models
 efficientnet_model = load_model(EFFICIENTNET_MODEL_PATH)
@@ -36,18 +38,21 @@ def predict():
     try:
         img = Image.open(file).convert('RGB')
 
-        # Resize based on model
+        # Resize & preprocess based on model
         if model_type == 'efficientnet':
             model = efficientnet_model
             target_size = (300, 300)
+            img = img.resize(target_size)
+            img_array = efficientnet_preprocess(np.array(img))
         elif model_type == 'mobilenet':
             model = mobilenet_model
             target_size = (128, 128)
+            img = img.resize(target_size)
+            img_array = mobilenet_preprocess(np.array(img))
         else:
             return jsonify({'error': 'Invalid model type'}), 400
 
-        img = img.resize(target_size)
-        img_array = np.array(img) / 255.0
+        # Expand dimensions for batch format
         img_array = np.expand_dims(img_array, axis=0)
 
         # Predict

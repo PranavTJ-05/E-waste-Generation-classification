@@ -2,48 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>E-Waste Classification</title>
-  <style>
-    body { font-family: Arial; text-align: center; padding: 40px; }
-    .upload-box { border: 2px dashed #ccc; padding: 30px; width: 300px; margin: auto; }
-    .button-group { margin-top: 20px; }
-    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
-  </style>
+  <title>E-Waste Classifier</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <h1>E-Waste Image Classifier</h1>
 
   <div class="upload-box" id="drop-area">
-    <p>Drag and drop an image here</p>
+    <p>Drag and drop an image here or click to select</p>
     <input type="file" id="fileInput" accept="image/*" />
+    <img id="preview" src="" alt="Image Preview" style="display:none; margin-top:20px; max-width:100%; border: 1px solid #ccc;" />
   </div>
 
   <div class="button-group">
-    <button onclick="submitForm('mobilenet')">Predict with MobileNetV3Large</button>
-    <button onclick="submitForm('efficientnet')">Predict with EfficientNetV2B3</button>
+    <button onclick="submitForm('mobilenet')">🔍 Predict with MobileNetV3Large</button>
+    <button onclick="submitForm('efficientnet')">🔬 Predict with EfficientNetV2B3</button>
   </div>
 
   <div id="result"></div>
+  <div id="model-info"></div>
 
   <script>
     const fileInput = document.getElementById("fileInput");
     const dropArea = document.getElementById("drop-area");
+    const preview = document.getElementById("preview");
 
+    // Drag & Drop Preview
     dropArea.addEventListener("dragover", (e) => {
       e.preventDefault();
-      dropArea.style.borderColor = "green";
+      dropArea.classList.add("dragover");
     });
 
     dropArea.addEventListener("dragleave", () => {
-      dropArea.style.borderColor = "#ccc";
+      dropArea.classList.remove("dragover");
     });
 
     dropArea.addEventListener("drop", (e) => {
       e.preventDefault();
+      dropArea.classList.remove("dragover");
       fileInput.files = e.dataTransfer.files;
+      showPreview(fileInput.files[0]);
     });
 
-    function submitForm(model) {
+    // Manual Upload Preview
+    fileInput.addEventListener("change", () => {
+      showPreview(fileInput.files[0]);
+    });
+
+    function showPreview(file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function submitForm(modelType) {
       const file = fileInput.files[0];
       if (!file) {
         alert("Please upload an image first.");
@@ -52,7 +67,7 @@
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("model", model);
+      formData.append("model", modelType);
 
       fetch("/predict", {
         method: "POST",
@@ -60,8 +75,16 @@
       })
         .then((res) => res.json())
         .then((data) => {
-          document.getElementById("result").innerHTML =
-            `<h2>Prediction: ${data.class}</h2><p>Confidence: ${data.confidence}%</p>`;
+          document.getElementById("result").innerHTML = `
+            <h2>🔎 Prediction: ${data.class}</h2>
+            <p>Confidence: ${data.confidence}</p>
+            <p>Model Used: ${modelType === 'mobilenet' ? 'MobileNetV3Large' : 'EfficientNetV2B3'}</p>
+          `;
+
+          document.getElementById("model-info").innerHTML =
+            modelType === 'mobilenet'
+              ? `<div class="about"><h3>📘 About MobileNetV3Large</h3><p>Lightweight, fast, and optimized for mobile/web. Ideal for real-time applications where speed and size matter most.</p></div>`
+              : `<div class="about"><h3>📗 About EfficientNetV2B3</h3><p>Highly accurate deep CNN model with strong generalization. Suitable for server-side deployments where accuracy is prioritized.</p></div>`;
         })
         .catch((err) => {
           console.error(err);

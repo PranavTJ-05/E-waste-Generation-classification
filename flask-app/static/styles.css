@@ -1,0 +1,61 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f8f9fa;
+  text-align: center;
+  padding: 40px;
+  color: #333;
+}
+
+h1 {
+  color: #2c3e50;
+}
+
+.upload-box {
+  border: 2px dashed #ccc;
+  padding: 30px;
+  width: 320px;
+  margin: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.upload-box.dragover {
+  border-color: #4CAF50;
+  background: #f0fff0;
+}
+
+.button-group {
+  margin-top: 30px;
+}
+
+button {
+  margin: 10px;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#result {
+  margin-top: 30px;
+  font-size: 18px;
+}
+
+.about {
+  margin-top: 20px;
+  background-color: #eef9ff;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
