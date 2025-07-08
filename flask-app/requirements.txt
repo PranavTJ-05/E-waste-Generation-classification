@@ -1,3 +1,0 @@
-Flask
-tensorflow
-Pillow
